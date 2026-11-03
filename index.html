@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>InsightFlow AI | Dashboard de Vendas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>InsightFlow AI</h1>
+      <p class="muted" id="periodo">Dashboard de vendas &middot; E-commerce</p>
+    </div>
+    <nav class="themes" id="themes" aria-label="Escolher tema"></nav>
+  </header>
+
+  <main>
+    <section class="kpis" id="kpis"></section>
+
+    <section class="card">
+      <h2>Insights automáticos</h2>
+      <ul class="insights" id="insights"></ul>
+    </section>
+
+    <section class="grid">
+      <div class="card wide">
+        <div class="head">
+          <h2>Evolução mensal</h2>
+          <select id="metric" aria-label="Métrica">
+            <option value="receita">Receita</option>
+            <option value="lucro">Lucro</option>
+            <option value="pedidos">Pedidos</option>
+          </select>
+        </div>
+        <div id="ch-mensal" class="chart"></div>
+      </div>
+      <div class="card"><h2>Receita por categoria</h2><div id="ch-cat" class="chart"></div></div>
+      <div class="card"><h2>Receita por região</h2><div id="ch-reg" class="chart"></div></div>
+      <div class="card"><h2>Top 10 produtos</h2><div id="ch-prod" class="chart tall"></div></div>
+      <div class="card">
+        <h2>Canais de venda</h2><div id="ch-canal" class="chart half"></div>
+        <h2>Dia da semana</h2><div id="ch-dia" class="chart half"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="muted">Dados fictícios gerados para demonstração.</footer>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="kpis_data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

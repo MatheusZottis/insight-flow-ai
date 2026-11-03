@@ -1,0 +1,18 @@
+{
+  "linhas_originais": 13518,
+  "duplicatas_removidas": 200,
+  "datas_invalidas": 0,
+  "precos_convertidos_de_texto": 382,
+  "categorias_padronizadas": 1905,
+  "estados_padronizados": 1105,
+  "nulos_antes": {
+    "email": 540,
+    "city": 356,
+    "discount_pct": 248,
+    "payment_method": 254,
+    "channel": 179
+  },
+  "quantidades_outlier_corrigidas": 12,
+  "linhas_finais": 13318,
+  "nulos_depois": 0
+}
