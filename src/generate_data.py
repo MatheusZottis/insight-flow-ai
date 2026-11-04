@@ -72,6 +72,9 @@ CATALOG = [
     ("Pet Shop", "Arranhador para Gatos", 119.90, 0.40),
     ("Pet Shop", "Cama Pet Confort M", 99.90, 0.38),
 ]
+# Ajuste de margem: custo mais alto = margem mais realista para e-commerce
+CATALOG = [(c, n, p, round(min(r + 0.15, 0.88), 2)) for c, n, p, r in CATALOG]
+
 # Peso de popularidade: itens baratos vendem mais
 prices = np.array([p[2] for p in CATALOG])
 pop = 1 / np.sqrt(prices)
