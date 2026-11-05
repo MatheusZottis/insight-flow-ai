@@ -1,4 +1,4 @@
-// InsightFlow AI: dashboard de vendas
+// Insight Flow AI: dashboard de vendas
 // Lê window.KPIS (gerado por src/kpis.py em web/kpis_data.js)
 
 const K = window.KPIS;
@@ -43,12 +43,12 @@ function renderKpis() {
   const g = K.geral, s = K.status, c = K.crescimento_anual || {};
   const items = [
     ["Receita líquida", brl(g.receita_liquida), c.receita_pct],
-    ["Lucro", brl(g.lucro), c.lucro_pct, `Margem de ${pt(g.margem_pct)}%`],
+    g.lucro != null && ["Lucro", brl(g.lucro), c.lucro_pct, `Margem de ${pt(g.margem_pct)}%`],
     ["Pedidos", num(g.pedidos), c.pedidos_pct],
     ["Ticket médio", brl2(g.ticket_medio), c.ticket_medio_pct],
-    ["Cancelamento", `${pt(s.taxa_cancelamento_pct)}%`, null, "dos pedidos"],
-    ["Devolução", `${pt(s.taxa_devolucao_pct)}%`, null, "dos pedidos"],
-  ];
+    s && ["Cancelamento", `${pt(s.taxa_cancelamento_pct)}%`, null, "dos pedidos"],
+    s && ["Devolução", `${pt(s.taxa_devolucao_pct)}%`, null, "dos pedidos"],
+  ].filter(Boolean);
   $("kpis").innerHTML = items.map(([label, valor, delta, sub]) => {
     const d = delta == null ? "" :
       `<span class="delta ${delta >= 0 ? "pos" : "neg"}">${delta >= 0 ? "▲" : "▼"} ${pt(Math.abs(delta))}% vs ${c.ano_anterior}</span>`;
@@ -66,19 +66,25 @@ function renderInsights() {
   if (c && c.receita_pct != null) {
     out.push(`A receita ${c.receita_pct >= 0 ? "cresceu" : "caiu"} <b>${pt(Math.abs(c.receita_pct))}%</b> de ${c.ano_anterior} para ${c.ano_atual}, e os pedidos variaram ${pt(c.pedidos_pct)}%.`);
   }
-  const cat = K.por_categoria[0], catMargem = [...K.por_categoria].sort((a, b) => b.margem_pct - a.margem_pct)[0];
-  out.push(`<b>${cat.category}</b> lidera em receita (${pt(cat.participacao_pct)}% do total). A maior margem está em <b>${catMargem.category}</b> (${pt(catMargem.margem_pct)}%).`);
+  const cat = K.por_categoria && K.por_categoria[0];
+  if (cat) {
+    let t = `<b>${cat.category}</b> lidera em receita (${pt(cat.participacao_pct)}% do total).`;
+    if (cat.margem_pct != null) {
+      const mm = [...K.por_categoria].sort((a, b) => b.margem_pct - a.margem_pct)[0];
+      t += ` A maior margem está em <b>${mm.category}</b> (${pt(mm.margem_pct)}%).`;
+    }
+    out.push(t);
+  }
+  const reg = K.por_regiao && K.por_regiao[0];
+  if (reg) out.push(`A região <b>${reg.region}</b> concentra ${pt(reg.participacao_pct)}% da receita; as demais regiões são oportunidade de expansão.`);
 
-  const reg = K.por_regiao[0];
-  out.push(`A região <b>${reg.region}</b> concentra ${pt(reg.participacao_pct)}% da receita; as demais regiões são oportunidade de expansão.`);
+  const canal = K.por_canal && K.por_canal[0];
+  if (canal) out.push(`O canal <b>${canal.channel}</b> é o principal, com ${pt(canal.participacao_pct)}% das vendas.`);
 
-  const canal = K.por_canal[0];
-  out.push(`O canal <b>${canal.channel}</b> é o principal, com ${pt(canal.participacao_pct)}% das vendas.`);
+  const perda = K.perda_por_categoria && K.perda_por_categoria[0];
+  if (perda) out.push(`<b>${perda.category}</b> tem a maior taxa de cancelamento + devolução (${pt(perda.taxa_problema_pct)}%): vale investigar a causa.`);
 
-  const perda = K.perda_por_categoria[0];
-  out.push(`<b>${perda.category}</b> tem a maior taxa de cancelamento + devolução (${pt(perda.taxa_problema_pct)}%): vale investigar a causa.`);
-
-  out.push(`Só <b>${pt(K.recorrencia.taxa_recompra_pct)}%</b> dos clientes compraram mais de uma vez, o que indica espaço para ações de fidelização.`);
+  if (K.recorrencia) out.push(`Só <b>${pt(K.recorrencia.taxa_recompra_pct)}%</b> dos clientes compraram mais de uma vez, o que indica espaço para ações de fidelização.`);
   $("insights").innerHTML = out.map((t) => `<li>${t}</li>`).join("");
 }
 
@@ -114,6 +120,15 @@ function barV(id, labels, values, colors) {
   }], baseLayout({ margin: { l: 56, r: 8, t: 4, b: 28 } }), CFG);
 }
 
+// Mostra/esconde o gráfico (e o card) conforme o dado existe; devolve se existe
+function toggle(id, data) {
+  const el = $(id), card = el.closest(".card");
+  const multi = card.querySelectorAll(".chart").length > 1;
+  const alvo = multi ? [el, el.previousElementSibling] : [card];
+  alvo.forEach((t) => (t.style.display = data ? "" : "none"));
+  return !!data;
+}
+
 function drawCharts() {
   const p = palette(), m = $("metric").value, d = K.mensal;
   const fmt = m === "pedidos" ? num : brl;
@@ -124,16 +139,16 @@ function drawCharts() {
     fill: "tozeroy", fillcolor: alpha(p[0], 0.18), line: { color: p[0], width: 3, shape: "spline" }, marker: { size: 6 },
   }], baseLayout(), CFG);
 
-  barH("ch-cat", K.por_categoria, "category", "receita", p[0]);
-  barH("ch-prod", K.top_produtos_receita, "product_name", "receita", p[1]);
+  if (toggle("ch-cat", K.por_categoria)) barH("ch-cat", K.por_categoria, "category", "receita", p[0]);
+  if (toggle("ch-prod", K.top_produtos_receita)) barH("ch-prod", K.top_produtos_receita, "product_name", "receita", p[1]);
 
-  Plotly.react("ch-reg", [{
+  if (toggle("ch-reg", K.por_regiao)) Plotly.react("ch-reg", [{
     type: "pie", hole: 0.55, labels: K.por_regiao.map((r) => r.region), values: K.por_regiao.map((r) => r.receita),
     text: K.por_regiao.map((r) => brl(r.receita)), hovertemplate: "%{label}<br>%{text}<extra></extra>",
     marker: { colors: p, line: { color: "rgba(0,0,0,0)" } }, textinfo: "label+percent",
   }], baseLayout({ margin: { l: 10, r: 10, t: 10, b: 10 } }), CFG);
 
-  barV("ch-canal", K.por_canal.map((r) => r.channel), K.por_canal.map((r) => r.receita), p);
+  if (toggle("ch-canal", K.por_canal)) barV("ch-canal", K.por_canal.map((r) => r.channel), K.por_canal.map((r) => r.receita), p);
   barV("ch-dia", K.por_dia_semana.map((r) => DIAS[r.weekday]), K.por_dia_semana.map((r) => r.receita), p[2]);
 }
 
@@ -145,9 +160,10 @@ function init() {
     setTheme(document.documentElement.dataset.theme);
     return;
   }
-  $("periodo").textContent = `Vendas de e-commerce · ${K.periodo.inicio} a ${K.periodo.fim}`;
+  $("periodo").textContent = `${K.cliente ? K.cliente + " · " : ""}Vendas · ${K.periodo.inicio} a ${K.periodo.fim}`;
   renderKpis();
   renderInsights();
+  if (K.geral.lucro == null) $("metric").querySelector('option[value="lucro"]').remove();
   $("metric").addEventListener("change", drawCharts);
   let saved = null;
   try { saved = localStorage.getItem("insightful-theme"); } catch (e) { /* ignora */ }

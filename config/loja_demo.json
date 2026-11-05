@@ -1,0 +1,28 @@
+{
+  "cliente": "Loja Demo",
+  "aba": 0,
+  "formato_data": "dia_primeiro",
+  "colunas": {
+    "order_date": "order_date",
+    "order_id": "order_id",
+    "quantity": "quantity",
+    "unit_price": "unit_price",
+    "customer_id": "customer_id",
+    "customer_name": "customer_name",
+    "product_name": "product_name",
+    "category": "category",
+    "status": "status",
+    "discount_pct": "discount_pct",
+    "unit_cost": "unit_cost",
+    "shipping_fee": "shipping_fee",
+    "state": "state",
+    "city": "city",
+    "channel": "channel",
+    "payment_method": "payment_method",
+    "email": "email"
+  },
+  "status_venda_valida": ["Entregue"],
+  "status_cancelado": ["Cancelado"],
+  "status_devolvido": ["Devolvido"],
+  "quantidade_maxima": 20
+}
