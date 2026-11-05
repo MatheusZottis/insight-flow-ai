@@ -47,16 +47,18 @@ O arquivo está em [`powerbi/InsightFlow.pbix`](powerbi/InsightFlow.pbix).
 
 ```
 insight-flow-ai/
+├── config/             # configurações de colunas (exemplo: loja_demo.json)
 ├── data/
-│   ├── raw/            # base original (suja)
-│   └── processed/      # base limpa, relatório e indicadores
+│   ├── raw/            # base de demonstração (suja)
+│   └── processed/      # saídas da versão anterior do pipeline
 ├── src/
 │   ├── generate_data.py   # gera a base fictícia
-│   ├── cleaning.py        # limpeza e colunas derivadas
-│   └── kpis.py            # cálculo dos indicadores
-├── web/                # dashboard (HTML, CSS, JS)
-├── docs/               # imagens do README
+│   ├── cleaning.py        # limpeza guiada pela configuração
+│   ├── kpis.py            # cálculo dos indicadores
+│   └── run.py             # roda o pipeline completo para um cliente
+├── web/                # modelo do dashboard (HTML, CSS, JS)
 ├── powerbi/            # versão em Power BI (.pbix e tema)
+├── docs/               # imagens do README
 └── requirements.txt
 ```
 
@@ -72,13 +74,26 @@ python -m venv .venv
 # 2. Instalar as dependências
 pip install -r requirements.txt
 
-# 3. Rodar o pipeline, na ordem
+# 3. (Opcional) Gerar a base fictícia de demonstração
 python src/generate_data.py
-python src/cleaning.py
-python src/kpis.py
+
+# 4. Rodar o pipeline com a base de demonstração
+python src/run.py --arquivo data/raw/vendas_raw.csv --config config/loja_demo.json
 ```
 
-Depois, abra `web/index.html` no navegador.
+O resultado fica em `saida/loja-demo/`: a pasta `dashboard/` contém a página pronta (abrir `index.html`) e `dados/` contém a base limpa, o relatório de limpeza e os indicadores.
+
+## Usando com a planilha de um cliente
+
+Cada cliente tem um arquivo de configuração (`.json`) que diz quais colunas da planilha dele correspondem a cada informação. Basta copiar `config/loja_demo.json`, trocar o nome do cliente e, na seção `colunas`, colocar o nome exato de cada coluna da planilha.
+
+- **Obrigatórias:** data do pedido, número do pedido, quantidade e preço unitário.
+- **Opcionais:** cliente, produto, categoria, status, desconto, custo, estado, canal, forma de pagamento, entre outras. Se a planilha não tiver alguma, basta remover a linha: os indicadores que dependem dela são pulados, e o dashboard esconde os gráficos correspondentes.
+- Os textos de status que contam como venda, cancelamento e devolução também são configuráveis.
+
+```powershell
+python src/run.py --arquivo clientes/nome-do-cliente/vendas.xlsx --config clientes/nome-do-cliente/config.json
+```
 
 ## Regras de negócio
 
@@ -92,7 +107,7 @@ Depois, abra `web/index.html` no navegador.
 - [x] Pipeline de limpeza e indicadores
 - [x] Dashboard web com temas
 - [x] Versão em Power BI
-- [ ] Upload de planilhas pelo usuário (qualquer Excel ou CSV)
+- [x] Pipeline configurável por cliente (mapeamento de colunas)
 - [ ] Insights escritos por IA (Claude API)
 
 ## Autor
