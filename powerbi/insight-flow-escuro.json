@@ -1,0 +1,36 @@
+{
+  "name": "Insight Flow Escuro",
+  "dataColors": ["#7c8cff", "#3ddc97", "#ffb86b", "#ff6b81", "#4dd0e1", "#c792ea"],
+  "background": "#181c2f",
+  "foreground": "#e8eaf6",
+  "foregroundNeutralSecondary": "#8d93b3",
+  "tableAccent": "#7c8cff",
+  "good": "#3ddc97",
+  "neutral": "#ffb86b",
+  "bad": "#ff6b81",
+  "maximum": "#7c8cff",
+  "center": "#ffb86b",
+  "minimum": "#ff6b81",
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [
+          { "color": { "solid": { "color": "#0f1220" } }, "transparency": 0 }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [
+          { "show": true, "color": { "solid": { "color": "#181c2f" } }, "transparency": 0 }
+        ],
+        "border": [
+          { "show": true, "color": { "solid": { "color": "#272c47" } }, "radius": 14 }
+        ],
+        "title": [
+          { "show": true, "fontColor": { "solid": { "color": "#e8eaf6" } }, "fontSize": 12 }
+        ]
+      }
+    }
+  }
+}

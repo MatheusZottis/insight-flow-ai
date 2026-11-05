@@ -23,6 +23,14 @@ O visual é totalmente personalizável via variáveis CSS. O dashboard vem com 6
 |---|---|
 | ![Tema Oceano](docs/tema-oceano.png) | ![Tema Corporativo](docs/tema-corporativo.png) |
 
+## Versão em Power BI
+
+Além do dashboard web, o mesmo modelo foi construído no Power BI, a partir da base limpa gerada pelo pipeline em Python. Inclui tabela de calendário, medidas em DAX (receita, lucro, margem, ticket médio, taxas de cancelamento e devolução, crescimento vs ano anterior) e um tema com a mesma identidade visual do dashboard web.
+
+![Dashboard no Power BI](docs/powerbi.png)
+
+O arquivo está em [`powerbi/InsightFlow.pbix`](powerbi/InsightFlow.pbix).
+
 ## Relatório de limpeza
 
 ![Relatório de limpeza](docs/relatorio-limpeza.png)
@@ -33,6 +41,7 @@ O visual é totalmente personalizável via variáveis CSS. O dashboard vem com 6
 - **HTML, CSS e JavaScript**: interface do dashboard
 - **Plotly**: gráficos interativos
 - **GitHub Pages**: publicação
+- **Power BI** e **DAX**: versão complementar do dashboard
 
 ## Estrutura do projeto
 
@@ -47,6 +56,7 @@ insight-flow-ai/
 │   └── kpis.py            # cálculo dos indicadores
 ├── web/                # dashboard (HTML, CSS, JS)
 ├── docs/               # imagens do README
+├── powerbi/            # versão em Power BI (.pbix e tema)
 └── requirements.txt
 ```
 
@@ -81,7 +91,7 @@ Depois, abra `web/index.html` no navegador.
 
 - [x] Pipeline de limpeza e indicadores
 - [x] Dashboard web com temas
-- [ ] Versão em Power BI
+- [x] Versão em Power BI
 - [ ] Upload de planilhas pelo usuário (qualquer Excel ou CSV)
 - [ ] Insights escritos por IA (Claude API)
 
