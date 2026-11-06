@@ -88,6 +88,21 @@ function renderInsights() {
   $("insights").innerHTML = out.map((t) => `<li>${t}</li>`).join("");
 }
 
+// ---------- Análise por IA (opcional) ----------
+function renderIA() {
+  const antigo = $("ia-card");
+  if (antigo) antigo.remove();
+  if (!K.insights_ia || !K.insights_ia.length) return;
+  const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const card = document.createElement("section");
+  card.className = "card";
+  card.id = "ia-card";
+  card.innerHTML = `<h2>Análise por IA${K.insights_ia_simulada ? " (simulação)" : ""}</h2>` +
+    `<ul class="insights">${K.insights_ia.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` +
+    `<p class="muted">Gerado por IA a partir dos indicadores agregados. São hipóteses a validar, não fatos.</p>`;
+  $("insights").closest(".card").after(card);
+}
+
 // ---------- Gráficos ----------
 const CFG = { displayModeBar: false, responsive: true };
 
@@ -163,6 +178,7 @@ function init() {
   $("periodo").textContent = `${K.cliente ? K.cliente + " · " : ""}Vendas · ${K.periodo.inicio} a ${K.periodo.fim}`;
   renderKpis();
   renderInsights();
+  renderIA();
   if (K.geral.lucro == null) $("metric").querySelector('option[value="lucro"]').remove();
   $("metric").addEventListener("change", drawCharts);
   let saved = null;

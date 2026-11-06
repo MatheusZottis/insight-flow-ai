@@ -5,6 +5,7 @@ indicadores e monta a pasta de entrega com o dashboard pronto.
 
 Uso (na raiz do projeto):
     python src/run.py --arquivo data/raw/vendas_raw.csv --config config/loja_demo.json
+    python src/run.py --arquivo ... --config ... --ia      (com insights da Claude API)
 
 Saída (em saida/<nome-do-cliente>/):
     dashboard/   -> abrir index.html; é isso que vai para o cliente
@@ -52,6 +53,12 @@ def main():
     ap.add_argument("--arquivo", required=True, help="planilha do cliente (.xlsx, .xls ou .csv)")
     ap.add_argument("--config", required=True, help="arquivo de configuração do cliente (.json)")
     ap.add_argument("--saida", help="pasta de saída (padrão: saida/<cliente>)")
+    ap.add_argument("--ia", action="store_true", help="gera insights escritos com a Claude API (opcional)")
+    ap.add_argument("--ia-simulada", action="store_true",
+                    help="preenche o card de IA com textos de exemplo, sem API (só para testar o visual)")
+    ap.add_argument("--estimar-custo", action="store_true",
+                    help="estima o custo da IA por relatório, sem chamar a API (não precisa de chave)")
+    ap.add_argument("--modelo", default="claude-haiku-5-5", help="modelo da Claude API usado com --ia")
     args = ap.parse_args()
 
     arquivo, config = Path(args.arquivo), Path(args.config)
@@ -71,6 +78,41 @@ def main():
 
     kpis = compute_kpis(df, cfg)
     print_summary(kpis)
+
+    if args.estimar_custo:   # não gasta nada: só calcula o tamanho do prompt
+        from insights_ia import estimar_custo
+        e = estimar_custo(kpis, args.modelo)
+        print("ESTIMATIVA DE CUSTO DA IA (por relatório)")
+        print("-" * 52)
+        print(f"Modelo: {e['modelo']}")
+        print(f"Entrada: ~{e['entrada']:,} tokens | Saída: até {e['saida_max']:,} tokens")
+        print(f"Custo máximo estimado: US$ {e['custo_usd']:.4f} por relatório\n")
+
+    if args.ia:   # camada opcional: só roda com --ia e chave no .env
+        try:
+            from insights_ia import gerar_insights
+            textos, uso = gerar_insights(kpis, args.modelo)
+            kpis["insights_ia"] = textos
+            print("INSIGHTS POR IA")
+            print("-" * 52)
+            for t in textos:
+                print(f"- {t}\n")
+            print(f"(modelo {uso['modelo']}: {uso['entrada']:,} tokens de entrada, {uso['saida']:,} de saída)\n")
+        except Exception as e:   # a entrega não pode travar por causa da IA
+            print(f"\nAVISO: não foi possível gerar os insights por IA ({e}).")
+            print("O dashboard será gerado normalmente, sem eles.\n")
+
+    elif args.ia_simulada:
+        ex = ["Texto de EXEMPLO: aqui a IA vai escrever análises e sugestões a partir dos números do cliente."]
+        c = kpis.get("crescimento_anual")
+        if c and c["receita_pct"] is not None:
+            ex.append(f"A receita variou {c['receita_pct']}% de {c['ano_anterior']} para {c['ano_atual']}. "
+                      "Vale entender o que puxou esse resultado e repetir o que funcionou.")
+        if kpis.get("por_categoria"):
+            cat = kpis["por_categoria"][0]
+            ex.append(f"{cat['category']} concentra {cat['participacao_pct']}% da receita. Pode indicar dependência "
+                      "de uma categoria: vale investigar se há espaço para impulsionar as demais.")
+        kpis["insights_ia"], kpis["insights_ia_simulada"] = ex, True
 
     out = Path(args.saida) if args.saida else ROOT / "saida" / slug(cfg.get("cliente", "cliente"))
     dados, dash = out / "dados", out / "dashboard"
